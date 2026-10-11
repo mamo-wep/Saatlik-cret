@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelancer Saatlik Ücret Hesaplayıcı</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: #f3f4f6; 
+            color: #1f2937; 
+            margin: 0; 
+            padding: 2rem 1rem; 
+            display: flex; 
+            justify-content: center; 
+        }
+        .container { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+            width: 100%; 
+            max-width: 480px; 
+        }
+        h1 { 
+            font-size: 1.5rem; 
+            text-align: center; 
+            color: #111827; 
+            margin-bottom: 1.5rem; 
+        }
+        .form-group { 
+            margin-bottom: 1.25rem; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            color: #4b5563;
+        }
+        input { 
+            width: 100%; 
+            padding: 0.75rem; 
+            border: 1px solid #d1d5db; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 1rem; 
+            transition: border-color 0.2s;
+        }
+        input:focus { 
+            outline: none; 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
+        }
+        button { 
+            width: 100%; 
+            background-color: #3b82f6; 
+            color: white; 
+            border: none; 
+            padding: 1rem; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: background-color 0.2s; 
+            margin-top: 0.5rem; 
+        }
+        button:hover { 
+            background-color: #2563eb; 
+        }
+        .result { 
+            margin-top: 1.5rem; 
+            padding: 1.5rem; 
+            background-color: #eff6ff; 
+            border-radius: 12px; 
+            text-align: center; 
+            display: none; 
+            border: 1px solid #bfdbfe; 
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result h2 { 
+            margin: 0; 
+            font-size: 1.1rem; 
+            color: #1e40af; 
+        }
+        .result .price { 
+            font-size: 2.75rem; 
+            font-weight: 800; 
+            color: #1d4ed8; 
+            margin: 0.5rem 0; 
+        }
+        .result p { 
+            margin: 0; 
+            color: #3b82f6; 
+            font-size: 0.9rem; 
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Saatlik Ücret Hesaplayıcı</h1>
+        
+        <div class="form-group">
+            <label for="netIncome">Hedeflenen Aylık Net Gelir (₺)</label>
+            <input type="number" id="netIncome" value="30000" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="expenses">Aylık İş Giderleri (Yazılım, İnternet vb.) (₺)</label>
+            <input type="number" id="expenses" value="2000" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="hoursPerWeek">Haftalık Çalışma Saati</label>
+            <input type="number" id="hoursPerWeek" value="30" min="1" max="168">
+        </div>
+        
+        <div class="form-group">
+            <label for="weeksPerYear">Yılda Çalışılacak Hafta Sayısı (Örn: 48)</label>
+            <input type="number" id="weeksPerYear" value="48" min="1" max="52">
+        </div>
+        
+        <div class="form-group">
+            <label for="taxRate">Gelir Vergisi Oranı (%)</label>
+            <input type="number" id="taxRate" value="20" min="0" max="99">
+        </div>
+        
+        <button onclick="calculateRate()">Hesapla</button>
+
+        <div class="result" id="resultCard">
+            <h2>İdeal Saatlik Ücretiniz</h2>
+            <div class="price" id="hourlyRate">₺0.00</div>
+            <p>Müşterilerinize vermeniz gereken taban fiyat.</p>
+        </div>
+    </div>
+
+    <script>
+        function calculateRate() {
+            const netIncome = parseFloat(document.getElementById('netIncome').value) || 0;
+            const expenses = parseFloat(document.getElementById('expenses').value) || 0;
+            const hoursPerWeek = parseFloat(document.getElementById('hoursPerWeek').value) || 0;
+            const weeksPerYear = parseFloat(document.getElementById('weeksPerYear').value) || 0;
+            const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+
+            if(hoursPerWeek === 0 || weeksPerYear === 0) {
+                alert("Çalışma saati ve haftası sıfır olamaz!");
+                return;
+            }
+
+            // Aylık brüt ihtiyaç (Vergi düşüldükten sonra net + gider kalması için)
+            const requiredMonthlyNet = netIncome + expenses;
+            const monthlyGross = requiredMonthlyNet / (1 - (taxRate / 100));
+            
+            // Yıllık brüt ciro hedefi
+            const annualGross = monthlyGross * 12;
+
+            // Yıllık toplam çalışma saati
+            const totalHours = hoursPerWeek * weeksPerYear;
+
+            // Saatlik ücret
+            const hourlyRate = annualGross / totalHours;
+
+            // Sonucu ekrana yazdır
+            const resultCard = document.getElementById('resultCard');
+            const rateDisplay = document.getElementById('hourlyRate');
+
+            rateDisplay.innerText = "₺" + hourlyRate.toFixed(2);
+            resultCard.style.display = "block";
+        }
+    </script>
+</body>
+</html>
